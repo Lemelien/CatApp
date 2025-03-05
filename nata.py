@@ -5,71 +5,71 @@ from PySide6.QtWidgets import (QMainWindow, QTableWidget, QTableWidgetItem,
                                QPushButton, QDialog, QLineEdit, QFormLayout)
 
 # Загрузка данных о котах из API
-def load_cats():
-    url = "https://api.thecatapi.com/v1/breeds"
-    response = requests.get(url)
-    if response.status_code == 200:
-        return response.json()
+def загрузить_котов():
+    адрес = "https://api.thecatapi.com/v1/breeds"
+    ответ = requests.get(адрес)
+    if ответ.status_code == 200:
+        return ответ.json()
     return []
 
-# Модальное окно для подробной информации
-class CatDetailsDialog(QDialog):
-    def __init__(self, cat, parent=None):
-        super().__init__(parent)
-        self.cat = cat
-        self.setWindowTitle(f"Подробности о {cat.get('name', '')}")
+# Модальное окно для подробной информации о коте
+class ОкноПодробностейКота(QDialog):
+    def __init__(self, кот, родитель=None):
+        super().__init__(родитель)
+        self.кот = кот
+        self.setWindowTitle(f"Подробности о {кот.get('name', '')}")
         self.setModal(True)
-        self.is_editable = False
+        self.редактируемое = False
 
         # Форма для отображения данных
-        layout = QFormLayout()
-        self.name_edit = QLineEdit(cat.get("name", ""))
-        self.origin_edit = QLineEdit(cat.get("origin", ""))
-        self.temperament_edit = QLineEdit(cat.get("temperament", ""))
-        self.description_edit = QLineEdit(cat.get("description", ""))
-        self.life_span_edit = QLineEdit(cat.get("life_span", ""))
+        макет = QFormLayout()
+        self.поле_имя = QLineEdit(кот.get("name", ""))
+        self.поле_происхождение = QLineEdit(кот.get("origin", ""))
+        self.поле_темперамент = QLineEdit(кот.get("temperament", ""))
+        self.поле_описание = QLineEdit(кот.get("description", ""))
+        self.поле_жизнь = QLineEdit(кот.get("life_span", ""))
 
-        self.set_fields_read_only(True)
+        self.установить_только_чтение(True)
 
-        layout.addRow("Имя:", self.name_edit)
-        layout.addRow("Происхождение:", self.origin_edit)
-        layout.addRow("Темперамент:", self.temperament_edit)
-        layout.addRow("Описание:", self.description_edit)
-        layout.addRow("Продолжительность жизни:", self.life_span_edit)
+        макет.addRow("Имя:", self.поле_имя)
+        макет.addRow("Происхождение:", self.поле_происхождение)
+        макет.addRow("Темперамент:", self.поле_темперамент)
+        макет.addRow("Описание:", self.поле_описание)
+        макет.addRow("Продолжительность жизни:", self.поле_жизнь)
 
         # Кнопки
-        self.edit_button = QPushButton("Редактировать")
-        self.save_button = QPushButton("Сохранить")
-        self.save_button.setEnabled(False)
-        layout.addRow(self.edit_button)
-        layout.addRow(self.save_button)
+        self.кнопка_редактировать = QPushButton("Редактировать")
+        self.кнопка_сохранить = QPushButton("Сохранить")
+        self.кнопка_сохранить.setEnabled(False)
+        макет.addRow(self.кнопка_редактировать)
+        макет.addRow(self.кнопка_сохранить)
 
-        self.edit_button.clicked.connect(self.toggle_edit)
-        self.save_button.clicked.connect(self.save_changes)
+        self.кнопка_редактировать.clicked.connect(self.переключить_редактирование)
+        self.кнопка_сохранить.clicked.connect(self.сохранить_изменения)
 
-        self.setLayout(layout)
+        self.setLayout(макет)
 
-    def set_fields_read_only(self, read_only):
-        self.name_edit.setReadOnly(read_only)
-        self.origin_edit.setReadOnly(read_only)
-        self.temperament_edit.setReadOnly(read_only)
-        self.description_edit.setReadOnly(read_only)
-        self.life_span_edit.setReadOnly(read_only)
+    def установить_только_чтение(self, только_чтение):
+        self.поле_имя.setReadOnly(только_чтение)
+        self.поле_происхождение.setReadOnly(только_чтение)
+        self.поле_темперамент.setReadOnly(только_чтение)
+        self.поле_описание.setReadOnly(только_чтение)
+        self.поле_жизнь.setReadOnly(только_чтение)
 
-    def toggle_edit(self):
-        self.is_editable = not self.is_editable
-        self.set_fields_read_only(not self.is_editable)
-        self.edit_button.setText("Отменить" if self.is_editable else "Редактировать")
-        self.save_button.setEnabled(self.is_editable)
+    def переключить_редактирование(self):
+        self.редактируемое = not self.редактируемое
+        self.установить_только_чтение(not self.редактируемое)
+        self.кнопка_редактировать.setText("Отменить" if self.редактируемое else "Редактировать")
+        self.кнопка_сохранить.setEnabled(self.редактируемое)
 
-    def save_changes(self):
-        self.cat["name"] = self.name_edit.text()
-        self.cat["origin"] = self.origin_edit.text()
-        self.cat["temperament"] = self.temperament_edit.text()
-        self.cat["description"] = self.description_edit.text()
-        self.cat["life_span"] = self.life_span_edit.text()
-        self.toggle_edit()
-        self.parent().update_table()
+    def сохранить_изменения(self):
+        self.кот["name"] = self.поле_имя.text()
+        self.кот["origin"] = self.поле_происхождение.text()
+        self.кот["temperament"] = self.поле_темперамент.text()
+        self.кот["description"] = self.поле_описание.text()
+        self.кот["life_span"] = self.поле_жизнь.text()
+        self.переключить_редактирование()
+        self.parent().обновить_таблицу()
 
 # Главное окно приложения
 class MainWindow(QMainWindow):
@@ -79,64 +79,64 @@ class MainWindow(QMainWindow):
         self.setGeometry(100, 100, 800, 600)
 
         # Загрузка данных
-        self.cats = load_cats()
+        self.коты = загрузить_котов()
 
-        # Основной виджет и layout
-        widget = QWidget()
-        self.layout_v = QVBoxLayout()
-        widget.setLayout(self.layout_v)
-        self.setCentralWidget(widget)
+        # Основной виджет и вертикальный макет
+        виджет = QWidget()
+        self.вертикальный_макет = QVBoxLayout()
+        виджет.setLayout(self.вертикальный_макет)
+        self.setCentralWidget(виджет)
 
         # Выпадающий список для фильтрации
-        self.origin_filter = QComboBox()
-        self.origin_filter.addItem("Все страны")
-        origins = sorted(set(cat.get("origin", "") for cat in self.cats))
-        self.origin_filter.addItems(origins)
-        self.origin_filter.currentTextChanged.connect(self.filter_table)
-        self.layout_v.addWidget(self.origin_filter)
+        self.фильтр_происхождения = QComboBox()
+        self.фильтр_происхождения.addItem("Все страны")
+        происхождения = sorted(set(кот.get("origin", "") for кот in self.коты))
+        self.фильтр_происхождения.addItems(происхождения)
+        self.фильтр_происхождения.currentTextChanged.connect(self.отфильтровать_таблицу)
+        self.вертикальный_макет.addWidget(self.фильтр_происхождения)
 
         # Таблица
-        self.table = QTableWidget()
-        self.table.setColumnCount(3)
-        self.table.setHorizontalHeaderLabels(["Имя", "Происхождение", "Темперамент"])
-        self.update_table()
-        self.table.doubleClicked.connect(self.show_details)
-        self.layout_v.addWidget(self.table)
+        self.таблица = QTableWidget()
+        self.таблица.setColumnCount(3)
+        self.таблица.setHorizontalHeaderLabels(["Имя", "Происхождение", "Темперамент"])
+        self.обновить_таблицу()
+        self.таблица.doubleClicked.connect(self.показать_подробности)
+        self.вертикальный_макет.addWidget(self.таблица)
 
         # Кнопка удаления
-        self.delete_button = QPushButton("Удалить выбранного кота")
-        self.delete_button.clicked.connect(self.delete_cat)
-        self.layout_v.addWidget(self.delete_button)
+        self.кнопка_удалить = QPushButton("Удалить выбранного кота")
+        self.кнопка_удалить.clicked.connect(self.удалить_кота)
+        self.вертикальный_макет.addWidget(self.кнопка_удалить)
 
-    def update_table(self):
-        filtered_cats = self.get_filtered_cats()
-        self.table.setRowCount(len(filtered_cats))
-        for row, cat in enumerate(filtered_cats):
-            self.table.setItem(row, 0, QTableWidgetItem(cat.get("name", "")))
-            self.table.setItem(row, 1, QTableWidgetItem(cat.get("origin", "")))
-            self.table.setItem(row, 2, QTableWidgetItem(cat.get("temperament", "")))
-        self.table.resizeColumnsToContents()
+    def обновить_таблицу(self):
+        отфильтрованные_коты = self.получить_отфильтрованных_котов()
+        self.таблица.setRowCount(len(отфильтрованные_коты))
+        for строка, кот in enumerate(отфильтрованные_коты):
+            self.таблица.setItem(строка, 0, QTableWidgetItem(кот.get("name", "")))
+            self.таблица.setItem(строка, 1, QTableWidgetItem(кот.get("origin", "")))
+            self.таблица.setItem(строка, 2, QTableWidgetItem(кот.get("temperament", "")))
+        self.таблица.resizeColumnsToContents()
 
-    def get_filtered_cats(self):
-        selected_origin = self.origin_filter.currentText()
-        if selected_origin == "Все страны":
-            return self.cats
-        return [cat for cat in self.cats if cat.get("origin", "") == selected_origin]
+    def получить_отфильтрованных_котов(self):
+        выбранное_происхождение = self.фильтр_происхождения.currentText()
+        if выбранное_происхождение == "Все страны":
+            return self.коты
+        return [кот for кот in self.коты if кот.get("origin", "") == выбранное_происхождение]
 
-    def show_details(self):
-        row = self.table.currentRow()
-        if row >= 0:
-            cat = self.get_filtered_cats()[row]
-            dialog = CatDetailsDialog(cat, self)
-            dialog.exec_()
+    def показать_подробности(self):
+        строка = self.таблица.currentRow()
+        if строка >= 0:
+            кот = self.получить_отфильтрованных_котов()[строка]
+            диалог = ОкноПодробностейКота(кот, self)
+            диалог.exec_()
 
-    def filter_table(self):
-        self.update_table()
+    def отфильтровать_таблицу(self):
+        self.обновить_таблицу()
 
-    def delete_cat(self):
-        row = self.table.currentRow()
-        if row >= 0:
-            filtered_cats = self.get_filtered_cats()
-            cat_to_remove = filtered_cats[row]
-            self.cats.remove(cat_to_remove)
-            self.update_table()
+    def удалить_кота(self):
+        строка = self.таблица.currentRow()
+        if строка >= 0:
+            отфильтрованные_коты = self.получить_отфильтрованных_котов()
+            кот_для_удаления = отфильтрованные_коты[строка]
+            self.коты.remove(кот_для_удаления)
+            self.обновить_таблицу()
